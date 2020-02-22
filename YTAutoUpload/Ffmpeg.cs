@@ -39,7 +39,7 @@ namespace YTAutoUpload
             }
         }
 
-        public static void BuildList(string output, params string[] videos)
+        public static void BuildList(string output, List<string> videos)
         {
             using (StreamWriter writer = new StreamWriter(File.Create(output)))
             {

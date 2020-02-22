@@ -10,6 +10,22 @@ namespace YTAutoUpload
 {
     public class FileSelector
     {
+        public static DateTime GetLatestRecordingTime(string directoryPath)
+        {
+            string[] allFiles = Directory.GetFiles(directoryPath);
+
+            DateTime latest = DateTime.MinValue;
+            foreach (string file in allFiles)
+            {
+                DateTime? time = ParseTimestamp(file);
+                if (!time.HasValue)
+                    continue;
+                if (time.Value > latest)
+                    latest = time.Value;
+            }
+            return latest;
+        }
+
         public static List<string> SelectFiles(string directoryPath, DateTime from, DateTime to)
         {
             if (from >= to)
@@ -31,7 +47,7 @@ namespace YTAutoUpload
 
             //find newest file inside datetime range
             int newest = -1; ;
-            for (int i = sortedFiles.Count -1; i >= 0; i--)
+            for (int i = sortedFiles.Count - 1; i >= 0; i--)
             {
                 if (sortedFiles[i] < to)
                 {

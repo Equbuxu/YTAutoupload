@@ -52,11 +52,11 @@ namespace YTAutoUpload
                 if (lastRecording9 >= startDateTime9)
                 {
                     Console.WriteLine("Uploading video for canvas 9...");
-                    Console.WriteLine(UploadDailyVideo(startDateTime9, 9, youtube) ? "Uploaded successfully" : "Failed to upload");
-                    startDateTime9 = startDateTime9.AddDays(1);
+                    Console.WriteLine(UploadWeeklyVideo(startDateTime9, 9, youtube) ? "Uploaded successfully" : "Failed to upload");
+                    startDateTime9 = startDateTime9.AddDays(7);
                 }
 
-                Thread.Sleep(1000 * 60 * 60); //1 hour
+                Thread.Sleep(1000 * 60 * 10); //10 min
             }
         }
 

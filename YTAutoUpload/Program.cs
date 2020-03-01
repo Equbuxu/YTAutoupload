@@ -12,15 +12,11 @@ namespace YTAutoUpload
     {
         public static void Main(string[] args)
         {
-            Console.WriteLine(FileSelector.GetLatestRecordingTime("7/videoout"));
-            /*
-            Youtube youtube = new Youtube();
-            youtube.Auth("client_secret.json");
-            youtube.UpdateCachedPlaylists();
-            //youtube.CreatePlaylist("test autoplaylist", "this is a descriprion", true, new string[] { "rag1", "rag2" });
-            //youtube.AddVideoToPlaylist("5Vcq26L9qnw", "PLicc_0TrQcHalaPGBGVImFNGcHnZ2wSjS");
+            DateTime dateTime7 = DateTime.Parse(args[0]);
+            DateTime dateTime8 = DateTime.Parse(args[1]);
+            DateTime dateTime9 = DateTime.Parse(args[2]);
 
-            UploadDailyVideo(new DateTime(2020, 1, 6), 7, youtube);*/
+            UploadLoop(dateTime7, dateTime8, dateTime9);
 
             Console.ReadKey();
         }
@@ -51,8 +47,65 @@ namespace YTAutoUpload
                     startDateTime8 = startDateTime8.AddDays(1);
                 }
 
-                Thread.Sleep(1000 * 60 * 60);
+                //9
+                DateTime lastRecording9 = FileSelector.GetLatestRecordingTime("9/videoout");
+                if (lastRecording9 >= startDateTime9)
+                {
+                    Console.WriteLine("Uploading video for canvas 9...");
+                    Console.WriteLine(UploadDailyVideo(startDateTime9, 9, youtube) ? "Uploaded successfully" : "Failed to upload");
+                    startDateTime9 = startDateTime9.AddDays(1);
+                }
+
+                Thread.Sleep(1000 * 60 * 60); //1 hour
             }
+        }
+
+        public static bool UploadWeeklyVideo(DateTime firstDay, int canvas, Youtube youtube)
+        {
+            DateTime from = new DateTime(firstDay.Year, firstDay.Month, firstDay.Day, 3, 0, 0);
+            DateTime to = from.AddDays(7);
+
+            CreateVideo("result.mp4", canvas + "/videoout", from, to);
+            Ffmpeg.RemoveInactiveSegments("result.mp4", "result-active.mp4");
+
+            string title = CreateWeeklyTitle(from, to.AddDays(-1), canvas);
+
+            DateTime uniFrom = from.ToUniversalTime();
+            DateTime uniTo = to.ToUniversalTime();
+            string description = $"http://pixelplace.io timelapse from {uniFrom.ToShortDateString()} {uniFrom.ToShortTimeString()} UTC to {uniTo.ToShortDateString()} {uniTo.ToShortTimeString()} UTC.";
+
+            string playlistName = $"{GetCanvasName(canvas)} - {GetLongMonth(firstDay)} {firstDay.Year}";
+
+            //Retrieve or create playlist
+            string playlistId = null;
+            if (youtube.CachedPlaylists.ContainsKey(playlistName))
+                playlistId = youtube.CachedPlaylists[playlistName];
+            else
+            {
+                if (youtube.CreatePlaylist(playlistName, "", false, new string[0]))
+                    playlistName = youtube.CachedPlaylists[playlistName];
+            }
+
+            //Upload video
+            string uploadedId;
+            if (!youtube.UploadVideo("result-active.mp4.mp4", title, description, new string[] { "pixelplace", "timelapse" }, true, out uploadedId))
+                return false;
+
+            //Add video to playlist
+            if (playlistId != null)
+                youtube.AddVideoToPlaylist(uploadedId, playlistId);
+
+            return true;
+        }
+
+        public static string CreateWeeklyTitle(DateTime from, DateTime to, int canvas)
+        {
+            if (from.Month == to.Month)
+                return $"{GetShortMonth(from)} {from.Day}-{to.Day}, {from.Year} - {GetCanvasName(canvas)} - 1 week timelapse";
+            else if (from.Year == to.Year)
+                return $"{GetShortMonth(from)} {from.Day} - {GetShortMonth(to)} {to.Day}, {from.Year} - {GetCanvasName(canvas)} - 1 week timelapse";
+            else
+                return $"{GetShortMonth(from)} {from.Day}, {from.Year} - {GetShortMonth(to)} {to.Day}, {to.Year} - {GetCanvasName(canvas)} - 1 week timelapse";
         }
 
         public static bool UploadDailyVideo(DateTime day, int canvas, Youtube youtube)

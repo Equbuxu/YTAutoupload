@@ -59,13 +59,13 @@ namespace YTAutoUpload
         private void OutputHandler(object sendingProcess, DataReceivedEventArgs outLine)
         {
             stdout.AddLast(outLine.Data);
-            Console.WriteLine(outLine.Data);
+            //Console.WriteLine(outLine.Data);
         }
 
         private void OutputErrHandler(object sendingProcess, DataReceivedEventArgs outLine)
         {
             stderr.AddLast(outLine.Data);
-            Console.WriteLine(outLine.Data);
+            //Console.WriteLine(outLine.Data);
         }
     }
 }

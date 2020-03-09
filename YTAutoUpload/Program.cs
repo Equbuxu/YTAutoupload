@@ -27,32 +27,45 @@ namespace YTAutoUpload
             youtube.Auth("client_secret.json");
             youtube.UpdateCachedPlaylists();
 
+            //calculate time interval ends
+            DateTime endTime7 = startDateTime7.AddDays(1);
+            endTime7 = new DateTime(endTime7.Year, endTime7.Month, endTime7.Day, 3, 0, 0);
+
+            DateTime endTime8 = startDateTime8.AddDays(1);
+            endTime8 = new DateTime(endTime8.Year, endTime8.Month, endTime8.Day, 3, 0, 0);
+
+            DateTime endTime9 = startDateTime9.AddDays(7);
+            endTime9 = new DateTime(endTime9.Year, endTime9.Month, endTime9.Day, 3, 0, 0);
+
             while (true)
             {
                 //7
                 DateTime lastRecording7 = FileSelector.GetLatestRecordingTime("7/videoout");
-                if (lastRecording7 >= startDateTime7)
+                if (lastRecording7 >= endTime7)
                 {
                     Console.WriteLine("Uploading video for canvas 7...");
                     Console.WriteLine(UploadDailyVideo(startDateTime7, 7, youtube) ? "Uploaded successfully" : "Failed to upload");
+                    endTime7 = endTime7.AddDays(1);
                     startDateTime7 = startDateTime7.AddDays(1);
                 }
 
                 //8
                 DateTime lastRecording8 = FileSelector.GetLatestRecordingTime("8/videoout");
-                if (lastRecording8 >= startDateTime8)
+                if (lastRecording8 >= endTime8)
                 {
                     Console.WriteLine("Uploading video for canvas 8...");
                     Console.WriteLine(UploadDailyVideo(startDateTime8, 8, youtube) ? "Uploaded successfully" : "Failed to upload");
+                    endTime8 = endTime8.AddDays(1);
                     startDateTime8 = startDateTime8.AddDays(1);
                 }
 
                 //9
                 DateTime lastRecording9 = FileSelector.GetLatestRecordingTime("9/videoout");
-                if (lastRecording9 >= startDateTime9)
+                if (lastRecording9 >= endTime9)
                 {
                     Console.WriteLine("Uploading video for canvas 9...");
                     Console.WriteLine(UploadWeeklyVideo(startDateTime9, 9, youtube) ? "Uploaded successfully" : "Failed to upload");
+                    endTime9 = endTime9.AddDays(1);
                     startDateTime9 = startDateTime9.AddDays(7);
                 }
 
@@ -88,7 +101,7 @@ namespace YTAutoUpload
 
             //Upload video
             string uploadedId;
-            if (!youtube.UploadVideo("result-active.mp4.mp4", title, description, new string[] { "pixelplace", "timelapse" }, true, out uploadedId))
+            if (!youtube.UploadVideo("result-active.mp4", title, description, new string[] { "pixelplace", "timelapse" }, true, out uploadedId))
                 return false;
 
             //Add video to playlist
@@ -240,11 +253,17 @@ namespace YTAutoUpload
             List<string> files = FileSelector.SelectFiles(canvas, from, to);
             List<string> finalList = new List<string>();
 
+            Console.WriteLine("Creating video:");
+            foreach (string st in files)
+            {
+                Console.WriteLine(st);
+            }
+
             CropCalcResult startCropResult;
             int startSeconds = CalculateCropSeconds(files[0], from, out startCropResult);
             if (startCropResult == CropCalcResult.Ok)
             {
-                Ffmpeg.Cut(files[0], "start.mp4", startSeconds, true);
+                Ffmpeg.Cut(files[0], "start.mp4", startSeconds, false);
                 finalList.Add("start.mp4");
             }
             else if (startCropResult == CropCalcResult.VideoLater)
@@ -259,7 +278,7 @@ namespace YTAutoUpload
             int endSeconds = CalculateCropSeconds(files[files.Count - 1], to, out endCropResult);
             if (endCropResult == CropCalcResult.Ok)
             {
-                Ffmpeg.Cut(files[files.Count - 1], "end.mp4", 0, true, endSeconds);
+                Ffmpeg.Cut(files[files.Count - 1], "end.mp4", 0, false, endSeconds);
                 finalList.Add("end.mp4");
             }
             else if (endCropResult == CropCalcResult.VideoEarlier)

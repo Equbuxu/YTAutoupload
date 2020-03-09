@@ -28,7 +28,7 @@ namespace YTAutoUpload
             if (!File.Exists(video))
                 return;
             string args = $"-i \"{video}\" -ss {start} ";
-            if (duration > 0)
+            if (duration >= 0)
                 args += $"-t {duration} ";
             if (fast)
                 args += "-c copy ";
@@ -61,7 +61,7 @@ namespace YTAutoUpload
 
         public static void RemoveInactiveSegments(string input, string output)
         {
-            string args = $"-i {input} -vf \"select = gt(scene\\, 0.00001),setpts = N / (60 * TB)\" {output}";
+            string args = $"-i {input} -vf \"select=gt(scene\\,0.00001),setpts=N/(60*TB)\" -y {output}";
             using (FfProcess process = new FfProcess("ffmpeg.exe", args))
             {
                 process.WaitForExit();

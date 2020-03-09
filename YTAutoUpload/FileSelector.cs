@@ -18,12 +18,29 @@ namespace YTAutoUpload
             foreach (string file in allFiles)
             {
                 DateTime? time = ParseTimestamp(file);
-                if (!time.HasValue)
+                if (!time.HasValue || IsFileInUse(file))
                     continue;
                 if (time.Value > latest)
                     latest = time.Value;
             }
             return latest;
+        }
+
+        public static bool IsFileInUse(string path)
+        {
+            try
+            {
+                using (FileStream stream = File.Open(path, FileMode.Open, FileAccess.Read, FileShare.None))
+                {
+                    stream.Close();
+                }
+            }
+            catch (IOException)
+            {
+                return true;
+            }
+
+            return false;
         }
 
         public static List<string> SelectFiles(string directoryPath, DateTime from, DateTime to)
@@ -38,7 +55,7 @@ namespace YTAutoUpload
             foreach (string file in allFiles)
             {
                 DateTime? time = ParseTimestamp(file);
-                if (!time.HasValue)
+                if (!time.HasValue || IsFileInUse(file))
                     continue;
                 files.Add(time.Value, file);
                 sortedFiles.Add(time.Value);

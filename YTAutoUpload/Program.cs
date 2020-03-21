@@ -8,20 +8,21 @@ using System.Threading.Tasks;
 
 namespace YTAutoUpload
 {
-    class Program
+    public class Program
     {
         public static void Main(string[] args)
         {
             DateTime dateTime7 = DateTime.Parse(args[0]);
             DateTime dateTime8 = DateTime.Parse(args[1]);
             DateTime dateTime9 = DateTime.Parse(args[2]);
+            DateTime dateTime10 = DateTime.Parse(args[3]);
 
-            UploadLoop(dateTime7, dateTime8, dateTime9);
+            UploadLoop(dateTime7, dateTime8, dateTime9, dateTime10);
 
             Console.ReadKey();
         }
 
-        public static void UploadLoop(DateTime startDateTime7, DateTime startDateTime8, DateTime startDateTime9)
+        public static void UploadLoop(DateTime startDateTime7, DateTime startDateTime8, DateTime startDateTime9, DateTime startDateTime10)
         {
             Youtube youtube = new Youtube();
             youtube.Auth("client_secret.json");
@@ -36,6 +37,9 @@ namespace YTAutoUpload
 
             DateTime endTime9 = startDateTime9.AddDays(7);
             endTime9 = new DateTime(endTime9.Year, endTime9.Month, endTime9.Day, 3, 0, 0);
+
+            DateTime endTime10 = startDateTime10.AddDays(7);
+            endTime10 = new DateTime(endTime10.Year, endTime10.Month, endTime10.Day, 3, 0, 0);
 
             while (true)
             {
@@ -65,8 +69,18 @@ namespace YTAutoUpload
                 {
                     Console.WriteLine("Uploading video for canvas 9...");
                     Console.WriteLine(UploadWeeklyVideo(startDateTime9, 9, youtube) ? "Uploaded successfully" : "Failed to upload");
-                    endTime9 = endTime9.AddDays(1);
+                    endTime9 = endTime9.AddDays(7);
                     startDateTime9 = startDateTime9.AddDays(7);
+                }
+
+                //10
+                DateTime lastRecording10 = FileSelector.GetLatestRecordingTime("10/videoout");
+                if (lastRecording10 >= endTime10)
+                {
+                    Console.WriteLine("Uploading video for canvas 10...");
+                    Console.WriteLine(UploadWeeklyVideo(startDateTime10, 10, youtube) ? "Uploaded successfully" : "Failed to upload");
+                    endTime10 = endTime10.AddDays(7);
+                    startDateTime10 = startDateTime10.AddDays(7);
                 }
 
                 Thread.Sleep(1000 * 60 * 10); //10 min
@@ -180,6 +194,8 @@ namespace YTAutoUpload
                     return "MVP";
                 case 9:
                     return "Inverted";
+                case 10:
+                    return "Pixels EU War";
             }
             return $"Canvas {canvasId}";
         }

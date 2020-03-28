@@ -115,7 +115,7 @@ namespace YTAutoUpload
 
             //Upload video
             string uploadedId;
-            if (!youtube.UploadVideo("result-active.mp4", title, description, new string[] { "pixelplace", "timelapse" }, true, out uploadedId))
+            if (!youtube.UploadVideo("result-active.mp4", title, description, new string[] { "pixelplace", "timelapse" }, false, out uploadedId))
                 return false;
 
             //Add video to playlist
@@ -162,7 +162,7 @@ namespace YTAutoUpload
 
             //Upload video
             string uploadedId;
-            if (!youtube.UploadVideo("result.mp4", title, description, new string[] { "pixelplace", "timelapse" }, true, out uploadedId))
+            if (!youtube.UploadVideo("result.mp4", title, description, new string[] { "pixelplace", "timelapse" }, false, out uploadedId))
                 return false;
 
             //Add video to playlist
